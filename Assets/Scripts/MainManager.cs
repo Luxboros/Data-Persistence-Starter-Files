@@ -1,10 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using Unity.Mathematics.Geometry;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class MainManager : MonoBehaviour
 {
@@ -17,22 +20,26 @@ public class MainManager : MonoBehaviour
     public GameObject NameInput;
     public GameObject GameOverText;
 
-    private bool m_Started = false;
+    private bool m_Started;
     private int m_Points;
 
-    private bool m_GameOver = false;
+    private bool m_GameOver;
     private static string m_BestScoreName;
     private static int m_BestScorePoints;
 
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
+        LoadBestScore();
         if (m_BestScorePoints != 0 && m_BestScoreName != null)
             BestScoreText.text = $"Best Score : {m_BestScoreName} : {m_BestScorePoints}";
+    }
+
+    void Start()
+    {
         const float step = 0.7f;
         int perLine = Mathf.FloorToInt(17f / step);
-        int[] pointsArray = new[] { 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7 };
+        int[] pointsArray = { 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -89,9 +96,43 @@ public class MainManager : MonoBehaviour
         {
             m_BestScoreName = name;
             m_BestScorePoints = m_Points;
+            SaveBestScore();
         }
 
         BestScoreText.text = $"Best Score : {m_BestScoreName} : {m_BestScorePoints}";
         NameInput.SetActive(false);
+    }
+
+    [Serializable]
+    public class BestScoreRecord
+    {
+        public int PlayerBestScore;
+        public string PlayerName;
+    }
+
+    private static void SaveBestScore()
+    {
+        BestScoreRecord data = new BestScoreRecord
+        {
+            PlayerName = m_BestScoreName,
+            PlayerBestScore = m_BestScorePoints
+        };
+
+        var json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(Application.persistentDataPath + "/record.json", json);
+    }
+
+    private void LoadBestScore()
+    {
+        var path = Application.persistentDataPath + "/record.json";
+        if (File.Exists(path))
+        {
+            var json = File.ReadAllText(path);
+            var data = JsonUtility.FromJson<BestScoreRecord>(json);
+
+            m_BestScoreName = data.PlayerName;
+            m_BestScorePoints = data.PlayerBestScore;
+        }
     }
 }
