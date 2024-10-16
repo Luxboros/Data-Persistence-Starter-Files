@@ -16,6 +16,7 @@ public class Paddle : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (MainManager.enteringName) return;
         float input = Input.GetAxis("Horizontal");
 
         Vector3 pos = transform.position;

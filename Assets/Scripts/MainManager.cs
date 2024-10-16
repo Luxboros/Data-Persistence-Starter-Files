@@ -26,6 +26,7 @@ public class MainManager : MonoBehaviour
     private bool m_GameOver;
     private static string m_BestScoreName;
     private static int m_BestScorePoints;
+    public static bool enteringName;
 
 
     private void Awake()
@@ -54,6 +55,7 @@ public class MainManager : MonoBehaviour
 
     private void Update()
     {
+        if (enteringName) return;
         if (!m_Started)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -101,6 +103,12 @@ public class MainManager : MonoBehaviour
 
         BestScoreText.text = $"Best Score : {m_BestScoreName} : {m_BestScorePoints}";
         NameInput.SetActive(false);
+        enteringName = false;
+    }
+
+    public void EditingInput(string name)
+    {
+        enteringName = true;
     }
 
     [Serializable]
